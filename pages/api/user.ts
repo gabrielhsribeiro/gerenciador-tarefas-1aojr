@@ -2,7 +2,6 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { connectToDB } from '../../middlewares/connectToDB';
 import { UserModel } from '../../models/User';
 import { DefaultMessageResponse } from '../../types/DefaultMessageResponse';
-// import { User } from '../../types/User';
 import CryptoJS from "crypto-js";
 import { User } from '../../types/User';
 
@@ -41,7 +40,7 @@ const endpoint = async (req: NextApiRequest, res: NextApiResponse<DefaultMessage
         }
 
         user.password = CryptoJS.AES.encrypt(user.password, MY_SECRET_KEY).toString();
-
+console.log();
         await UserModel.create(user);
         return res.status(200).json({ msg: 'Usuário cadastrado com sucesso.' });
     } catch (e: any) {
