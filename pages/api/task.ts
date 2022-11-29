@@ -19,7 +19,7 @@ const endpoint = async (req: NextApiRequest, res: NextApiResponse<DefaultMessage
         }
     } catch (e: any) {
         console.log('Ocorreu erro ao listar tarefas do usuário:', e);
-        return res.status(500).json({ error: 'Ocorreu erro ao listar tarefas do usuário, tente novamente....' });
+        return res.status(500).json({error: 'Ocorreu erro ao listar tarefas do usuário, tente novamente....'});
     }
 }
 
@@ -30,21 +30,21 @@ const getTasks = async(req: NextApiRequest, res: NextApiResponse<DefaultMessageR
 
 const saveTask = async(req: NextApiRequest, res: NextApiResponse<DefaultMessageResponse | any>) => {
     if (!req.body) {
-        return res.status(400).json({ error: 'Favor informar os dados para cadastro' });
+        return res.status(400).json({error: 'Favor informar os dados para cadastro' });
     }
 
     const task = req.body as Task;
 
     if(!task.userId){
-        return res.status(400).json({ error: 'Usuario não encontrado' });
+        return res.status(400).json({error: 'Usuario não encontrado'});
     }
 
     if(!task.name || task.name.length < 2){
-        return res.status(400).json({ error: 'Nome não é válido' });
+        return res.status(400).json({error: 'Nome não é válido'});
     }
 
     if(!task.finishPrevisionDate || task.finishPrevisionDate.length < 8){
-        return res.status(400).json({ error: 'Data de previsão não é válida' });
+        return res.status(400).json({error: 'Data de previsão não é válida'});
     }
 
     await TaskModel.create(task);
@@ -53,33 +53,37 @@ const saveTask = async(req: NextApiRequest, res: NextApiResponse<DefaultMessageR
 
 const updateTask = async(req: NextApiRequest, res: NextApiResponse<DefaultMessageResponse | any>) => {
     if (!req.body) {
-        return res.status(400).json({ error: 'Favor informar os dados para atualizar' });
+        return res.status(400).json({error: 'Favor informar os dados para atualizar'});
     }
 
     const task = req.body as Task;
 
     if(!task.userId){
-        return res.status(400).json({ error: 'Usuario não encontrado' });
+        return res.status(400).json({error: 'Usuario não encontrado'});
     }
 
     if(!task._id){
-        return res.status(400).json({ error: 'Necessário id da Tarefa a ser atualizada' });
+        return res.status(400).json({error: 'Necessário id da Tarefa a ser atualizada'});
     }
 
     const existsWithSameId = await TaskModel.find({_id: task._id});
     if(!existsWithSameId){
-        return res.status(400).json({ error: 'Tarefa não existente' });
+        return res.status(400).json({error: 'Tarefa não existente'});
     }
 
     const id_task=task._id;
     delete task._id;
 
-    if(!task.name || task.name.length < 2){
-        return res.status(400).json({ error: 'Nome não é válido' });
+    if(task.name && task.name.length < 2){
+        return res.status(400).json({error: 'Nome não é válido'});
     }
 
-    if(!task.finishPrevisionDate || task.finishPrevisionDate.length < 8){
-        return res.status(400).json({ error: 'Data de previsão não é válida' });
+    if(task.finishPrevisionDate && task.finishPrevisionDate.length < 8){
+        return res.status(400).json({error: 'Data de previsão não é válida'});
+    }
+
+    if(task.finishDate && task.finishDate.length < 8){
+        return res.status(400).json({error: 'Data de finalização não é válida'});
     }
 
     await TaskModel.updateOne({_id:id_task},task);
@@ -88,17 +92,17 @@ const updateTask = async(req: NextApiRequest, res: NextApiResponse<DefaultMessag
 
 const deleteTask = async(req: NextApiRequest, res: NextApiResponse<DefaultMessageResponse | any>) => {
     if (!req.body) {
-        return res.status(400).json({ error: 'Favor informar os dados para deletar' });
+        return res.status(400).json({error: 'Favor informar os dados para deletar'});
     }
 
     const task = req.body as Task;
 
     if(!task.userId){
-        return res.status(400).json({ error: 'Usuario não encontrado' });
+        return res.status(400).json({error: 'Usuario não encontrado'});
     }
 
     if(!task._id){
-        return res.status(400).json({ error: 'Necessário id da Tarefa a ser deletada' });
+        return res.status(400).json({error: 'Necessário id da Tarefa a ser deletada'});
     }
 
     const existsWithSameId = await TaskModel.find({_id: task._id});
