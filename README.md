@@ -44,9 +44,6 @@ npm i jsonwebtoken
 npm i --save-dev @types/jsonwebtoken
 npm i moment
 
-npm install -g npm@latest
-npm i har-validator
-
-npm i sass
 npm i node-sass sass react-bootstrap
-npm i bootstrap@4.60
+npm i bootstrap@4.6.0
+npm i axios
