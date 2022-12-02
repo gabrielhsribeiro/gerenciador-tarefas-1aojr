@@ -8,7 +8,7 @@
     border-top: none;
 
     span{
-        display:none;
+        display: none;
     }
 
     button{
@@ -24,12 +24,23 @@
         color: $primaryColor;
         padding: 0px 15px;
 
+
         img{
             margin-right: 15px;
         }
     }
 
     @media screen and (min-width: $mediaQueryDesktop) {
+       border-top: 1px solid $lightGreyColor;
+       padding: 15px;
+        button{
+            display: none;
+        }
 
+        span{
+            display: block;
+            font-size: 14px;
+            color: $primaryColor;
+        }
     }
 }
