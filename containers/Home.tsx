@@ -1,7 +1,17 @@
 import type { NextPage } from "next";
+import { Header } from "../components/Header";
 
-export const Home : NextPage = () => {
-    return (
-        <h1>Bem, vindo</h1>
-    );
+type HomeProps = {
+    setToken(s: string): void
+}
+export const Home: NextPage<HomeProps> = ({setToken}) => {
+
+    const sair = () => {
+        localStorage.clear();
+        setToken('');
+    }
+
+    return (<>
+        <Header sair={sair}/>
+    </>);
 }
