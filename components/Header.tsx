@@ -3,6 +3,7 @@ import type { NextPage } from "next";
 type HeaderProps = {
     sair(): void
 }
+
 export const Header : NextPage<HeaderProps> = ({sair}) => {
     return (
         <div className="container-header">
