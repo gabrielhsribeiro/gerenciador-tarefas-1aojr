@@ -43,7 +43,7 @@ input, select {
     border-bottom: 1px solid $mediumGreyColor;
 
     &:focus{
-        border-bottom: 1px solid $primaryColor;
+        border-bottom-color: $primaryColor;
     }
 
     outline: none;
@@ -71,11 +71,20 @@ input, select {
     }
 
     select{
-        min-width: 110px;
+        min-width: 125px;
     }
+}
+
+.error{
+    text-align: center;
+    color: $errorColor;
+    font-weight: bold;
 }
 
 @import './login.scss';
 @import './header.scss';
-@import './filter.scss';
 @import './footer.scss';
+@import './filters.scss';
+@import './list.scss';
+@import './item.scss';
+@import './modal.scss';

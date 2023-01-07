@@ -1,14 +1,20 @@
 import type { NextPage } from "next";
+// import { User } from "../types/User";
 
 type HeaderProps = {
-    sair(): void
+    sair(): void,
+    showModal():void
 }
 
-export const Header : NextPage<HeaderProps> = ({sair}) => {
+// type UserProps = {
+//     user: User
+// }
+
+export const Header : NextPage<HeaderProps/*,UserProps*/> = ({sair, showModal/*,user*/}) => {
     return (
         <div className="container-header">
             <img src="/logo.svg" alt="Logo Fiap" className="logo"/>
-            <button><span>+</span>Adicionar Tarefa</button>
+            <button onClick={showModal}><span>+</span>Adicionar Tarefa</button>
             <div className="mobile">
                 <span>Olá, </span>
                 <img src="/exit-mobile.svg" alt="Sair" onClick={sair}/>

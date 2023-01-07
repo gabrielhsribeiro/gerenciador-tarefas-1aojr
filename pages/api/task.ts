@@ -143,7 +143,7 @@ const saveTask = async (req: NextApiRequest, res: NextApiResponse<DefaultMessage
         }
 
         if (!task.finishPrevisionDate || moment(task.finishPrevisionDate).isBefore(moment())) {
-            return res.status(400).json({ error: 'Data de previsao invalida ou menor que hoje' });
+            return res.status(400).json({ error: 'Data de previsão inválida ou menor que hoje' });
         }
 
         const final = {
