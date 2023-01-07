@@ -2,9 +2,9 @@ import type {NextApiRequest, NextApiResponse, NextApiHandler} from 'next';
 import { DefaultMessageResponse } from '../types/DefaultMessageResponse';
 import jwt, {JwtPayload} from 'jsonwebtoken';
 
-export const jwtValidator = (handler: NextApiHandler) => 
+export const jwtValidator = (handler: NextApiHandler) =>
     async (req: NextApiRequest, res: NextApiResponse<DefaultMessageResponse>) => {
-    
+
     const {MY_SECRET_KEY} = process.env;
     if(!MY_SECRET_KEY){
         return res.status(500).json({error : 'Env MY_SECRET_KEY não informada'});
