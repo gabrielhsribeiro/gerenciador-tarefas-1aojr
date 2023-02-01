@@ -5,6 +5,7 @@ import { Item } from "./Item";
 import { executeRequest } from '../services/api';
 import { Modal } from "react-bootstrap";
 import moment from 'moment';
+import { validateTaskUpdateAPI } from '../context/validateAPI';
 
 type ListProps = {
     tasks: Task[],
@@ -21,6 +22,8 @@ export const List: NextPage<ListProps> = ({ tasks, getFilteredData }) => {
     const [name, setName] = useState('');
     const [finishPrevisionDate, setFinishPrevisionDate] = useState('');
     const [finishDate, setFinishDate] = useState('');
+    const [taskFinished, setTaskFinished] = useState(false); //para saber se é uma tarefa concluida e, dai, abrir o modal apenas com o botao de exclusao
+    const [createdDate, setCreatedDate] = useState(''); //variável adicionada para que o update de tarefas não permita alterar a data de conclusão para posterior a quando a tarefa foi criada
 
     const closeModal = () => {
         setShowModal(false);
@@ -29,6 +32,8 @@ export const List: NextPage<ListProps> = ({ tasks, getFilteredData }) => {
         setName('');
         setFinishPrevisionDate('');
         setFinishDate('');
+        setTaskFinished(false);
+        setCreatedDate('');
         setId('');
     }
 
@@ -38,14 +43,23 @@ export const List: NextPage<ListProps> = ({ tasks, getFilteredData }) => {
         setErrorMsg('');
         setName(task.name);
         setFinishPrevisionDate(moment(task.finishPrevisionDate).format('yyyy-MM-DD'));
+        if(typeof(task.finishDate) !== 'undefined'){
+            setTaskFinished(true);
+        }
+        setCreatedDate(task.createdDate)
         setId(task._id);
     }
 
     const doUpdate = async () => {
         try {
             setErrorMsg('');
-            if (!_id || !name || !finishPrevisionDate) {
-                setErrorMsg('Favor preencher os campos!');
+            if (!_id) {
+                setErrorMsg('Favor informar o id!');
+                return
+            }
+            const error_msg=validateTaskUpdateAPI(name,finishPrevisionDate,createdDate,finishDate);
+            if(error_msg!==''){
+                setErrorMsg(error_msg);
                 return
             }
 
@@ -60,8 +74,8 @@ export const List: NextPage<ListProps> = ({ tasks, getFilteredData }) => {
                 body.finishDate = finishDate;
             }
 
-            await executeRequest('task?id='+_id, 'put', body);
-            await getFilteredData();
+            await executeRequest('task?id='+_id, 'PUT', body);
+            getFilteredData();
             closeModal();
         } catch (e: any) {
             console.log(`Erro ao atualizar tarefa: ${e}`);
@@ -81,8 +95,8 @@ export const List: NextPage<ListProps> = ({ tasks, getFilteredData }) => {
                 setErrorMsg('Favor informar o id!');
                 return
             }
-            await executeRequest('task?id='+_id, 'delete');
-            await getFilteredData();
+            await executeRequest('task?id='+_id, 'DELETE');
+            getFilteredData();
             closeModal();
         } catch (e: any) {
             console.log(`Erro ao deletar tarefa: ${e}`);
@@ -112,18 +126,20 @@ export const List: NextPage<ListProps> = ({ tasks, getFilteredData }) => {
                 onHide={closeModal}
                 className="container-modal">
                 <Modal.Body>
-                    <p>Atualizar uma tarefa</p>
+                    {taskFinished ? <p>Excluir tarefa '{name}'</p> : <p>Atualizar uma tarefa</p>}
                     {errorMsg && <p className="error">{errorMsg}</p>}
-                    <input type='text' placeholder="Nome da tarefa"
-                        value={name} onChange={e => setName(e.target.value)} />
-                    <input type='date' placeholder="Previsão da tarefa"
-                        value={finishPrevisionDate} onChange={e => setFinishPrevisionDate(e.target.value)} />
-                    <input type='date' placeholder="Conclusão da tarefa"
-                        value={finishDate} onChange={e => setFinishDate(e.target.value)} />
+                    {taskFinished ? '' :
+                        <><input type='text' placeholder="Nome da tarefa"
+                            value={name} onChange={e => setName(e.target.value)} />
+                        <input type='date' placeholder="Previsão da tarefa"
+                            value={finishPrevisionDate} onChange={e => setFinishPrevisionDate(e.target.value)} required />
+                        <input type='date' placeholder="Conclusão da tarefa"
+                            value={finishDate} onChange={e => setFinishDate(e.target.value)} required /></>}
                 </Modal.Body>
                 <Modal.Footer>
                     <div className="button col-12">
-                        <button onClick={doUpdate} disabled={loading}>{loading ? '...Carregando' : 'Atualizar'}</button>
+                        {taskFinished ? '' :
+                        <button onClick={doUpdate} disabled={loading}>{loading ? '...Carregando' : 'Atualizar'}</button>}
                         <span onClick={doRemove}>Excluir</span>
                     </div>
                 </Modal.Footer>

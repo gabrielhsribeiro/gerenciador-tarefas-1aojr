@@ -40,7 +40,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 ## Libraries necessary to install
 
-Run the following commands:
+Run the following commands to install some necessary libs:
 
 npm i mongoose
 npm i crypto-js
@@ -52,3 +52,9 @@ npm i moment
 npm i node-sass sass react-bootstrap
 npm i bootstrap@4.6.0
 npm i axios
+
+To kill process in port 3000 run:
+npx kill-port 3000
+
+In mongoDB compass, when using the Cloud option, the connection is made by:
+mongodb+srv://{usuario}:{password}@cluster0.fsy2hen.mongodb.net/test

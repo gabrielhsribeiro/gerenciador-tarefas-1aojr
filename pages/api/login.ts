@@ -6,30 +6,30 @@ import CryptoJS from "crypto-js";
 import jwt from 'jsonwebtoken';
 import { connectToDB } from '../../middlewares/connectToDB';
 
-const loginEndpoint = async function (requisicao: NextApiRequest, resposta: NextApiResponse<DefaultMessageResponse | any>) {
+const loginEndpoint = async function (req: NextApiRequest, res: NextApiResponse<DefaultMessageResponse | any>) {
     try {
-        if (requisicao.method !== 'POST') {
-            return resposta.status(405).json({ error: 'Método informado não existe' });
+        if (req.method !== 'POST') {
+            return res.status(405).json({ error: 'Método informado não existe' });
         }
 
         const {MY_SECRET_KEY} = process.env;
         if(!MY_SECRET_KEY){
-            return resposta.status(500).json({error : 'Env MY_SECRET_KEY não informada'});
+            return res.status(500).json({error : 'Env MY_SECRET_KEY não informada'});
         }
 
-        if (!requisicao.body) {
-            return resposta.status(400).json({ error: 'Favor informar os dados para autenticação' });
+        if (!req.body) {
+            return res.status(400).json({ error: 'Favor informar os dados para autenticação' });
         }
 
-        const { login, password } = requisicao.body;
+        const { login, password } = req.body;
 
         if(!login || !password){
-            return resposta.status(400).json({ error: 'Favor informar os dados para autenticação' });
+            return res.status(400).json({ error: 'Favor informar os dados para autenticação' });
         }
 
         const existsUserWithEmail = await UserModel.find({email: login});
         if(!existsUserWithEmail || existsUserWithEmail.length === 0){
-            return resposta.status(400).json({ error: 'Usuário e senha não conferem' });
+            return res.status(400).json({ error: 'Usuário e senha não conferem' });
         }
 
         const user = existsUserWithEmail[0] as User;
@@ -45,13 +45,13 @@ const loginEndpoint = async function (requisicao: NextApiRequest, resposta: Next
                 email: user.email
             }
 
-            return resposta.status(200).json(result);
+            return res.status(200).json(result);
         }
 
-        return resposta.status(400).json({ error: 'Usuário e senha não conferem' });
+        return res.status(400).json({ error: 'Usuário e senha não conferem' });
     } catch (e: any) {
         console.log('Ocorreu erro ao logar usuário:', e);
-        return resposta.status(500).json({ error: 'Ocorreu erro ao logar usuário, tente novamente....' });
+        return res.status(500).json({ error: 'Ocorreu erro ao logar usuário, tente novamente....' });
     }
 }
 

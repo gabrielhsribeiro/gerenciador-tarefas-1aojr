@@ -6,30 +6,31 @@ export const jwtValidator = (handler: NextApiHandler) =>
     async (req: NextApiRequest, res: NextApiResponse<DefaultMessageResponse>) => {
 
     const {MY_SECRET_KEY} = process.env;
+    const error_msg='Não foi possível validar token de acesso!';
     if(!MY_SECRET_KEY){
         return res.status(500).json({error : 'Env MY_SECRET_KEY não informada'});
     }
 
     if(!req || !req.headers){
-        return res.status(401).json({error : 'Não foi possível validar token de acesso!'});
+        return res.status(401).json({error : error_msg});
     }
 
     if(req.method !== 'OPTIONS'){
         const authorization = req.headers['authorization'];
 
         if(!authorization){
-            return res.status(401).json({error : 'Não foi possível validar token de acesso!'});
+            return res.status(401).json({error : error_msg});
         }
 
         const token = authorization.substring(7);
         if(!token){
-            return res.status(401).json({error : 'Não foi possível validar token de acesso!'});
+            return res.status(401).json({error : error_msg});
         }
 
         try{
             const decoded = jwt.verify(token, MY_SECRET_KEY) as JwtPayload;
             if(!decoded){
-                return res.status(401).json({error : 'Não foi possível validar token de acesso!'});
+                return res.status(401).json({error : error_msg});
             }
 
             if(req.body){
@@ -39,8 +40,8 @@ export const jwtValidator = (handler: NextApiHandler) =>
             }
 
         }catch(e){
-            console.log('Não foi possível validar token de acesso:', e);
-            return res.status(500).json({error : 'Não foi possível validar token de acesso!'});
+            console.log(error_msg, e);
+            return res.status(500).json({error : error_msg});
         }
     }
 
