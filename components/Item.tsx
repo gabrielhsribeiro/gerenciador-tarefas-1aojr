@@ -19,8 +19,11 @@ export const Item : NextPage<ItemProps> = ({task, selectTask}) => {
     }
 
     return (
-        <div className={"container-item" + (isTaskFinished ? '' : ' active')}
-            onClick={() => isTaskFinished ? null : selectTask(task)}>
+        // pequeno ajuste para ser clicavel as tarefas concluidas, permitindo sua exclusão
+        // <div className={"container-item" + (isTaskFinished ? '' : ' active')}
+        //     onClick={() => isTaskFinished ? null : selectTask(task)}>
+        <div className={"container-item"}
+            onClick={() => selectTask(task)}>
             <img src={isTaskFinished ? '/checked.svg' : '/not-checked.svg'}
                 alt={isTaskFinished ? 'Tarefa concluída' : 'Tarefa em aberto'}/>
             <div>

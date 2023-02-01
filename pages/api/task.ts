@@ -1,5 +1,6 @@
 import moment from 'moment';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { validateTaskSaveAPI, validateTaskUpdateAPI } from '../../context/validateAPI';
 import { connectToDB } from '../../middlewares/connectToDB';
 import { jwtValidator } from '../../middlewares/jwtValidator';
 import { TaskModel } from '../../models/Task';
@@ -9,7 +10,6 @@ import { Task } from '../../types/Task';
 
 const endpoint = async (req: NextApiRequest, res: NextApiResponse<DefaultMessageResponse | any>) => {
     try{
-
         const userId = req?.body?.userId ? req?.body?.userId : req?.query?.userId as string;
         const failedValidation = await validateUser(userId);
         if(failedValidation){
@@ -26,7 +26,7 @@ const endpoint = async (req: NextApiRequest, res: NextApiResponse<DefaultMessage
             return await deleteTask(req, res, userId);
         }
 
-        res.status(400).json({ error: 'Metodo solicitado nao existe '});
+        res.status(400).json({ error: 'Método solicitado não existe '});
     }catch(e){
         console.log('Ocorreu erro ao gerenciar tarefas: ', e);
         res.status(500).json({ error: 'Ocorreu erro ao gerenciar tarefas, tente novamente '});
@@ -51,13 +51,18 @@ const validateTaskAndReturnValue = async (req: NextApiRequest, userId: string) =
 const updateTask = async (req: NextApiRequest, res: NextApiResponse<DefaultMessageResponse | Task[]>, userId: string) => {
     const taskFound = await validateTaskAndReturnValue(req, userId);
     if (!taskFound) {
-        return res.status(400).json({ error: 'Tarefa nao encontrada' });
+        return res.status(400).json({ error: 'Tarefa não encontrada' });
     }
 
     if (req.body) {
         const task = req.body as Task;
 
-        if (task.name && task.name.trim() !== '') {
+        const error_msg=validateTaskUpdateAPI(task.name,task.finishPrevisionDate,taskFound.createdDate,task.finishDate);
+        if(error_msg!==''){
+            return res.status(400).json({error: error_msg});
+        }
+
+        if (task.name) {
             taskFound.name = task.name;
         }
 
@@ -73,13 +78,13 @@ const updateTask = async (req: NextApiRequest, res: NextApiResponse<DefaultMessa
         return res.status(200).json({ msg: 'Tarefa atualizada com sucesso' });
     }
 
-    return res.status(400).json({ error: 'Parametro de entrada invalidos' });
+    return res.status(400).json({ error: 'Parâmetros de entrada inválidos' });
 }
 
 const deleteTask = async (req: NextApiRequest, res: NextApiResponse<DefaultMessageResponse | Task[]>, userId: string) => {
     const taskFound = await validateTaskAndReturnValue(req, userId);
     if (!taskFound) {
-        return res.status(400).json({ error: 'Tarefa nao encontrada' });
+        return res.status(400).json({ error: 'Tarefa não encontrada' });
     }
 
     await TaskModel.findByIdAndDelete({ _id: taskFound._id });
@@ -112,11 +117,12 @@ const getTasks = async (req: NextApiRequest, res: NextApiResponse<DefaultMessage
         switch (status) {
             case 1:
                 query.finishDate = null;
-                break;
+            break;
             case 2:
                 query.finishDate = { $ne: null };
-                break;
-            default: break;
+            break;
+            default:
+            break;
         }
     }
 
@@ -126,28 +132,27 @@ const getTasks = async (req: NextApiRequest, res: NextApiResponse<DefaultMessage
 
 const validateUser = async (userId: string) => {
     if (!userId) {
-        return 'Usuario nao informado';
+        return 'Usuário não informado';
     }
 
     const userFound = await UserModel.findById(userId);
     if (!userFound) {
-        return 'Usuario nao encontrado';
+        return 'Usuário não encontrado';
     }
 }
 
 const saveTask = async (req: NextApiRequest, res: NextApiResponse<DefaultMessageResponse>, userId: string) => {
     if (req.body) {
         const task = req.body as Task;
-        if (!task.name || task.name.length < 2) {
-            return res.status(400).json({ error: 'Nome da tarefa invalida' });
-        }
 
-        if (!task.finishPrevisionDate || moment(task.finishPrevisionDate).isBefore(moment())) {
-            return res.status(400).json({ error: 'Data de previsão inválida ou menor que hoje' });
+        const error_msg=validateTaskSaveAPI(task.name,task.finishPrevisionDate);
+        if(error_msg!==''){
+            return res.status(400).json({error: error_msg});
         }
 
         const final = {
             ...task,
+            createdDate: moment(moment.utc(moment.utc().format('YYYY-MM-DD HH:mm:ss')).toDate()).local().format('YYYY-MM-DD HH:mm:ss'),
             userId,
             finishDate: undefined
         } as any;
@@ -156,7 +161,7 @@ const saveTask = async (req: NextApiRequest, res: NextApiResponse<DefaultMessage
         return res.status(200).json({ msg: 'Tarefa criada com sucesso' });
     }
 
-    return res.status(400).json({ error: 'Parametros de entrada invalido' });
+    return res.status(400).json({ error: 'Parâmetros de entrada inválido' });
 }
 
 export default connectToDB(jwtValidator(endpoint));

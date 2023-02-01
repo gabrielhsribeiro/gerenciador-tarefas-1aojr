@@ -1,7 +1,28 @@
+@import '~bootstrap/scss/bootstrap';
 @import './config.scss';
 
 .container-modal {
     margin-top: 150px;
+
+    input[type="date"]::before {
+        content: attr(placeholder);
+        position: absolute;
+        color: $mediumGreyColor;
+    }
+
+    input[type="date"]:focus::before,
+    input[type="date"]:valid::before {
+        content: "";
+    }
+
+    input[type="date"] {
+        color: #ffffff;
+    }
+
+    input[type="date"]:focus,
+    input[type="date"]:valid {
+        color: $primaryColor;
+    }
 
     .modal-footer {
         border-top: none;

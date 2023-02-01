@@ -6,13 +6,14 @@ import { useEffect, useState } from "react";
 import { executeRequest } from "../services/api";
 import { List } from "../components/List";
 import { Modal } from "react-bootstrap";
+import { validateTaskSaveAPI } from "../context/validateAPI";
 
 type HomeProps = {
     setToken(s: string): void
+    setUser(s: string): void
 }
-export const Home: NextPage<HomeProps> = ({ setToken }) => {
 
-    const [user, setUser] = useState('');
+export const Home: NextPage<HomeProps> = ({ setToken, setUser }) => {
 
     // STATES DO FILTER
     const [list, setList] = useState([]);
@@ -30,6 +31,7 @@ export const Home: NextPage<HomeProps> = ({ setToken }) => {
     const sair = () => {
         localStorage.clear();
         setToken('');
+        setUser('');
     }
 
     const getFilteredData = async () => {
@@ -68,8 +70,9 @@ export const Home: NextPage<HomeProps> = ({ setToken }) => {
     const doSave = async () => {
         try{
             setErrorMsg('');
-            if(!name || !finishPrevisionDate){
-                setErrorMsg('Favor preencher os campos!');
+            const error_msg=validateTaskSaveAPI(name,finishPrevisionDate);
+            if(error_msg!==''){
+                setErrorMsg(error_msg);
                 return
             }
 
@@ -80,7 +83,7 @@ export const Home: NextPage<HomeProps> = ({ setToken }) => {
                 finishPrevisionDate
             };
 
-            await executeRequest('task', 'post', body);
+            await executeRequest('task', 'POST', body);
             await getFilteredData();
             closeModal();
         }catch(e : any){
@@ -116,7 +119,7 @@ export const Home: NextPage<HomeProps> = ({ setToken }) => {
                 <input type='text' placeholder="Nome da tarefa"
                     value={name} onChange={e => setName(e.target.value)} />
                 <input type='date' placeholder="Previsão da tarefa"
-                    value={finishPrevisionDate} onChange={e => setFinishPrevisionDate(e.target.value)} />
+                    value={finishPrevisionDate} onChange={e => setFinishPrevisionDate(e.target.value)} required/>
             </Modal.Body>
             <Modal.Footer>
                 <div className="button col-12">

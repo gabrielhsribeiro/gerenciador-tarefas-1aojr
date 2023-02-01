@@ -1,7 +1,8 @@
-export type Task = {    
-    _id: string | undefined,
+export type Task = {
+    _id: string,
     userId: string,
     name: string,
     finishPrevisionDate: string,
-    finishDate: string
+    finishDate: string,
+    createdDate: string
 }

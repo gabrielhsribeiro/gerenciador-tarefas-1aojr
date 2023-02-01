@@ -40,12 +40,13 @@
         margin-top: 15px;
         height: 65px;
 
-        &.active {
+        //deixei todas as entradas ativas para uma tarefa concluida poder ser excluida (não sera possivel editar via aplicação, embora seja via API diretamente)
+        // &.active {
             cursor: pointer;
             &:hover{
                 border-color: $primaryColor;
             }
-        }
+        // }
 
         img {
             width: 20px;

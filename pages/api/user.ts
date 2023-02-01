@@ -3,9 +3,11 @@ import { connectToDB } from '../../middlewares/connectToDB';
 import { UserModel } from '../../models/User';
 import { DefaultMessageResponse } from '../../types/DefaultMessageResponse';
 import CryptoJS from "crypto-js";
+import jwt from 'jsonwebtoken';
 import { User } from '../../types/User';
+import { validateUserAPI } from '../../context/validateAPI';
 
-const endpoint = async (req: NextApiRequest, res: NextApiResponse<DefaultMessageResponse>) => {
+const endpoint = async (req: NextApiRequest, res: NextApiResponse<DefaultMessageResponse | any>) => {
     try {
         if (req.method !== 'POST') {
             return res.status(405).json({error: 'Método informado não existe'});
@@ -22,16 +24,9 @@ const endpoint = async (req: NextApiRequest, res: NextApiResponse<DefaultMessage
 
         const user = req.body as User;
 
-        if(!user.name || user.name.length < 2){
-            return res.status(400).json({error: 'Nome não é válido'});
-        }
-
-        if(!user.email || user.email.length < 6){
-            return res.status(400).json({error: 'Email não é válido'});
-        }
-
-        if(!user.password || user.password.length < 6){
-            return res.status(400).json({error: 'Senha não é válida'});
+        const error_msg=validateUserAPI(user.name,user.email,user.password);
+        if(error_msg!==''){
+            return res.status(400).json({error: error_msg});
         }
 
         const existsWithSameEmail = await UserModel.find({email: user.email});
@@ -42,10 +37,20 @@ const endpoint = async (req: NextApiRequest, res: NextApiResponse<DefaultMessage
         user.password = CryptoJS.AES.encrypt(user.password, MY_SECRET_KEY).toString();
 
         await UserModel.create(user);
-        return res.status(200).json({msg: 'Usuário cadastrado com sucesso.'});
+        const userInsertedDB = await UserModel.find({email: user.email});
+        const userInserted = userInsertedDB[0] as User;
+
+        //a API de usuário vai retornar o token para permitir que, ao fazer o cadastro, já seja feito o login sem precisar chamar a API de login
+        const token = jwt.sign({_id: userInserted._id}, MY_SECRET_KEY);
+        const result = {
+            token,
+            name: user.name,
+            email: user.email
+        }
+        return res.status(200).json(result);
     } catch (e: any) {
         console.log('Ocorreu erro ao cadastrar usuário:', e);
-        return res.status(500).json({error: 'Ocorreu erro ao cadastrar usuário, tente novamente....'});
+        return res.status(500).json({error: 'Ocorreu erro ao cadastrar usuário, tente novamente...'});
     }
 }
 

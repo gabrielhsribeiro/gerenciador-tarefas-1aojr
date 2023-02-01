@@ -4,6 +4,7 @@ const TaskSchema = new Schema({
     userId: {type: String, required: true},
     name: {type: String, required: true},
     finishPrevisionDate: {type: String, required: true},
+    createdDate: {type: String, required: true},
     finishDate: {type: String},
 });
 
